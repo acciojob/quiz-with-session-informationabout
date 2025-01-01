@@ -30,6 +30,21 @@ const questions = [
   },
 ];
 
+let userAnswers = JSON.parse(sessionStorage.getItem("progress")) || new Array(questions.length);
+
+// Display the quiz questions and choices
+function renderQuestions() {
+  const questionsElement = document.getElementById("questions");
+  questionsElement.innerHTML = ''; // Clear any previous content
+
+  for (let i = 0; i < questions.length; i++) {
+    const question = questions[i];
+    const questionElement = document.createElement("div");
+
+    // Display the question text
+    const questionText = document.createTextNode(question.question);
+    questionElement.appendChild(questionText);
+
 // Display the quiz questions and choices
 function renderQuestions() {
   for (let i = 0; i < questions.length; i++) {
@@ -53,4 +68,37 @@ function renderQuestions() {
     questionsElement.appendChild(questionElement);
   }
 }
+function saveProgress() {
+  const allRadioButtons = document.querySelectorAll('input[type="radio"]:checked');
+  allRadioButtons.forEach((radioButton) => {
+    const questionIndex = parseInt(radioButton.name.split('-')[1]);
+    userAnswers[questionIndex] = radioButton.value;
+  });
+  sessionStorage.setItem("progress", JSON.stringify(userAnswers));
+}
+
+// Calculate the score based on selected answers
+function calculateScore() {
+  let score = 0;
+  userAnswers.forEach((answer, index) => {
+    if (answer === questions[index].answer) {
+      score++;
+    }
+  });
+  return score;
+}
+
+// Display the score and save it in localStorage
+function showScore() {
+  const score = calculateScore();
+  document.getElementById("score").innerText = `Your score is ${score} out of ${questions.length}.`;
+  localStorage.setItem("score", score); // Save the score in localStorage
+}
+
+// Handle submit button click
+document.getElementById("submit").addEventListener("click", () => {
+  saveProgress(); // Save progress before submitting
+  showScore(); // Calculate and display score
+});
+
 renderQuestions();
